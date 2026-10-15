@@ -1,32 +1,23 @@
 # Status TI Properties Booking Portal
 
-ZIP asal ditemui di Downloads dan disalin tanpa mengubah fail asal.
+ZIP asal ditemui di Downloads; fail asal tidak diubah. Kod dibaiki dan dimuat naik ke repositori GitHub pengguna. Hosting yang diluluskan ialah Netlify Free; database ialah Supabase Free dalam organisasi TI PROPERTIES SDN BHD.
 
-## Perubahan
+## Siap dan disahkan
 - Borang BM untuk enam ruang di tiga destinasi.
-- Penginapan menggunakan tarikh masuk/keluar; 12 unit berasingan. Waktu 15:00/12:00 ialah tetapan awal yang perlu disahkan pihak operasi.
-- Dashboard menapis status, memaparkan kontak dan memilih unit.
-- RLS menghadkan data pelanggan kepada admin; akaun biasa tidak boleh menaikkan peranan sendiri.
-- Status/unit sahaja boleh dikemas kini admin; perubahan direkod dalam audit.
-- Kekangan PostgreSQL exclusion menyekat pengesahan serentak yang bertindih pada unit sama. Slot bersebelahan dibenarkan.
-- Had penghantaran disimpan di database: lima setiap e-mel sejam, sepuluh setiap alamat rangkaian sejam. Alamat rangkaian di-HMAC dengan kunci pelayan dan tarikh; IP asal tidak disimpan. Header dipercayai khusus Vercel.
-- Semakan saiz request, jenis input, tarikh, masa, persetujuan dan honeypot. Kunci service role di modul server sahaja.
-- Header keselamatan dan dependencies dikemas kini.
+- Inventori 12 unit Kijal dengan tarikh masuk/keluar berasingan.
+- Dashboard memilih unit, menapis status dan merekod perubahan pengesahan.
+- Production build, ujian validator dan ujian HTTP tempatan lulus.
+- Audit dependencies selepas pembaikan PostCSS tidak menemui kelemahan diketahui.
+- Paparan utama berjaya diperiksa dalam pelayar.
+- Database Supabase aktif, RLS dihidupkan pada semua jadual aplikasi dan akses privileged diasingkan daripada browser.
+- Ujian database sebenar: pertindihan serentak ditolak; slot bersebelahan diterima; akses role biasa disekat; had permohonan e-mel dan rangkaian berfungsi; log audit diwujudkan.
+- Data ujian dibersihkan. Lihat DATABASE-VERIFICATION.md untuk bukti dan batas ujian.
 
 ## Belum selesai
-Sambungan GitHub, Vercel dan Supabase belum disahkan. Belum ada deployment atau URL awam yang disahkan. Ujian database/RLS/pertindihan sebenar dan ujian hujung-ke-hujung memerlukan projek Supabase. Jangan gunakan kod ini sebagai bukti sistem sudah live.
+- Satu medan rahsia server Netlify menunggu pengguna tampal terus nilai dari Supabase; pelayar automasi tidak mengembalikan nilai kunci. Tiada kunci disimpan dalam sumber atau chat.
+- Akaun admin tipgroupmarketing@gmail.com menunggu pengguna menetapkan password dalam borang Auth yang disediakan. Peranan admin dan ujian login akan diselesaikan selepas akaun wujud.
+- Deployment, ujian borang melalui hosting dan URL awam belum disahkan. Portal belum boleh dilaporkan live.
 
-Admin yang diminta: tipgroupmarketing@gmail.com. Peranan belum diaktifkan; akaun perlu diwujudkan dan e-mel disahkan terlebih dahulu.
-
-Tiada harga, kapasiti rasmi, bayaran online atau e-mel automatik ditetapkan. Tempahan ialah permohonan sehingga admin mengesahkan.
-
-## Pengesahan tempatan
-- Ujian validator: 3 lulus, termasuk input tidak sah dan suntikan status.
-- Production build Next.js: lulus.
-- Audit dependencies selepas pembaikan PostCSS: tiada kelemahan diketahui dilaporkan.
-- Ujian database sebenar belum dijalankan. Skrip tests/database.integration.mjs disediakan untuk ujian concurrency, RLS dan eskalasi peranan selepas sambungan.
-- Preview pelayar aplikasi mengalami timeout; semakan visual belum disahkan.
-
-- Ujian HTTP selepas pembetulan origin: empat halaman respons 200 dengan header keselamatan; cross-origin 403, JSON rosak 400, input tidak sah 400, request besar 413, jenis kandungan salah 415. Semuanya lulus.
-- Production build selepas pembetulan origin: lulus.
+## Tetapan operasi
+Masuk apartment 15:00 dan keluar 12:00 ialah tetapan awal yang perlu disahkan pihak operasi. Harga dan kapasiti rasmi belum diberikan. Tiada bayaran online atau notifikasi e-mel automatik. Semua penghantaran ialah permohonan sehingga admin mengesahkan. Status confirmed/completed menyekat inventori; pending/quoted/awaiting_payment tidak mengunci unit.
 

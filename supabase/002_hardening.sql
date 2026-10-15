@@ -22,22 +22,24 @@ alter table public.bookings add constraint no_double_booking exclude using gist 
 create table public.booking_audit(id bigint generated always as identity primary key,booking_id uuid not null references public.bookings(id),actor uuid,old_status text,new_status text,old_unit uuid,new_unit uuid,changed_at timestamptz not null default now());
 alter table public.booking_audit enable row level security;
 create policy "admins read audit" on public.booking_audit for select to authenticated using(exists(select 1 from public.admin_users where user_id=(select auth.uid())));
-create function public.audit_booking_change() returns trigger language plpgsql security definer set search_path='' as $$
+create schema if not exists private;
+revoke all on schema private from public,anon,authenticated;
+create function private.audit_booking_change() returns trigger language plpgsql security definer set search_path='' as $$
 begin
  if new.status is distinct from old.status or new.unit_id is distinct from old.unit_id then
  insert into public.booking_audit(booking_id,actor,old_status,new_status,old_unit,new_unit) values(new.id,auth.uid(),old.status,new.status,old.unit_id,new.unit_id);
  end if;return new;end $$;
-create trigger audit_booking after update on public.bookings for each row execute function public.audit_booking_change();
+create trigger audit_booking after update on public.bookings for each row execute function private.audit_booking_change();
 revoke update on public.bookings from authenticated;
 grant update(status,unit_id) on public.bookings to authenticated;
 -- Serialize submissions per email to prevent races in the durable rate limit.
 create table public.enquiry_limits(key text primary key,window_start timestamptz not null,hits integer not null);
 alter table public.enquiry_limits enable row level security;
 revoke all on public.enquiry_limits from anon,authenticated;
-create function public.submit_enquiry(payload jsonb) returns uuid language plpgsql security definer set search_path='' as $$
+create function public.submit_enquiry(payload jsonb) returns uuid language plpgsql security invoker set search_path='' as $$
 declare result uuid; v public.venues; chosen_unit uuid; hit_count integer;
 begin
- if length(payload->>'rate_key')<>64 then raise exception 'INVALID_RATE_KEY';end if;
+ if payload->>'rate_key' is null or length(payload->>'rate_key')<>64 then raise exception 'INVALID_RATE_KEY';end if;
  insert into public.enquiry_limits(key,window_start,hits) values(payload->>'rate_key',now(),1)
  on conflict(key) do update set hits=case when public.enquiry_limits.window_start<now()-interval '1 hour' then 1 else public.enquiry_limits.hits+1 end,window_start=case when public.enquiry_limits.window_start<now()-interval '1 hour' then now() else public.enquiry_limits.window_start end returning hits into hit_count;
  if hit_count>10 then raise exception 'RATE_LIMIT';end if;
@@ -51,6 +53,16 @@ begin
  return result;end $$;
 revoke all on function public.submit_enquiry(jsonb) from public,anon,authenticated;
 grant execute on function public.submit_enquiry(jsonb) to service_role;
-revoke all on function public.audit_booking_change() from public,anon,authenticated;
+revoke all on function private.audit_booking_change() from public,anon,authenticated;
 -- No anonymous SELECT/INSERT/UPDATE grants on customer records.
 revoke all on public.bookings,public.admin_users,public.booking_audit,public.units from anon;
+
+-- Explicit grants independent of new-project automatic exposure settings.
+grant select on public.venues to anon,authenticated;
+grant select on public.bookings,public.admin_users,public.units,public.booking_audit to authenticated;
+grant select,insert,update,delete on public.venues,public.bookings,public.admin_users,public.units,public.booking_audit,public.enquiry_limits to service_role;
+grant usage,select on sequence public.booking_audit_id_seq to service_role;
+create index bookings_email_created_idx on public.bookings(email,created_at);
+create index units_venue_idx on public.units(venue_id);
+create index booking_audit_booking_idx on public.booking_audit(booking_id);
+create index enquiry_limits_window_idx on public.enquiry_limits(window_start);

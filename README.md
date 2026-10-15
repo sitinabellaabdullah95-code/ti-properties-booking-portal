@@ -20,3 +20,6 @@ Permohonan belum menjadi tempahan sah. Admin menetapkan unit dan mengesahkan sta
 Data pelanggan dilindungi RLS. Akses admin memerlukan auth.users yang berdaftar dalam admin_users. Akaun biasa tidak boleh menetapkan peranan sendiri. Rahsia server menggunakan server-only. Had permohonan database menggunakan e-mel dan HMAC alamat rangkaian daripada header Netlify yang dipercayai. Jika hosting berbeza dipilih, semak semula sumber IP dan origin sebelum penerbitan.
 
 Lihat AUDIT-BM.md untuk status semasa dan batas pengesahan.
+
+## Database yang telah dipasang
+Projek: slqbzkyuindxzdurcspx, organisasi TI PROPERTIES SDN BHD. Migrasi dipasang melalui alat Supabase rasmi: 20261015100334 initial_booking_schema; 20261015100403 booking_inventory_and_access; 20261015100544 remove_legacy_function_and_protect_extensions. Migrasi terakhir membuang fungsi enforce_booking_conflict yang tidak digunakan dan memindahkan btree_gist ke schema extensions.

@@ -1,0 +1,3 @@
+import Link from 'next/link';
+export default function Brand(){return <Link href="/" className="official-brand" aria-label="TI Properties — Utama"><img src="/logos/ti-properties.webp" width="172" height="72" alt="TI Properties"/></Link>}
+export function LocationLogo({location,className=''}:{location:string;className?:string}){const logo=location.includes('Drawbridge')?['drawbridge','Kuala Terengganu Drawbridge']:location.includes('Poh')?['pulau-poh','Pulau Poh Tasik Kenyir — Managed by TI Properties']:location.includes('Kijal')?['kijal','Kijal Permai Residence — Managed by TI Properties']:null;return logo?<span className={'location-logo '+className}><img src={'/logos/'+logo[0]+'.webp'} alt={logo[1]} width="200" height="94"/></span>:null}

@@ -1,0 +1,18 @@
+import nodemailer from 'nodemailer';
+import {createClient} from '@supabase/supabase-js';
+import {confirmationEmail} from './confirmation-email.mjs';
+export async function processOneEmail(){
+ const pass=(process.env.GMAIL_APP_PASSWORD||'').replace(/\s/g,'');if(!/^[a-zA-Z]{16}$/.test(pass))return {state:'unconfigured'};
+ const url=process.env.NEXT_PUBLIC_SUPABASE_URL,key=process.env.SUPABASE_SERVICE_ROLE_KEY;if(!url||!key)return {state:'unconfigured'};
+ const db=createClient(url,key,{auth:{persistSession:false,autoRefreshToken:false}});
+ const {data:jobs,error}=await db.rpc('claim_confirmation_email');if(error)throw Error('QUEUE_UNAVAILABLE');const job=jobs?.[0];if(!job)return {state:'idle'};
+ async function finish(state:string,errorCode:string|null=null,messageId:string|null=null){const {error}=await db.from('email_outbox').update({state,error_code:errorCode,message_id:messageId,finished_at:new Date().toISOString()}).eq('id',job.id).eq('state','processing');if(error)throw Error('QUEUE_RESULT_UNSAVED');return {state,id:job.id}}
+ let recipient='tipgroupmarketing@gmail.com',message={subject:'UJIAN SISTEM — Sambungan e-mel TI Properties',text:'Ini ialah ujian sambungan e-mel portal TI Properties. Tiada tempahan pelanggan dibuat atau diubah. Jika anda menerima mesej ini, sambungan penghantaran e-mel berfungsi.'};
+ if(job.kind==='confirmation'){
+ const {data:b,error}=await db.from('bookings').select('id,status,customer_name,email,event_type,event_date,end_date,start_time,end_time,pax,venues(name),units(name)').eq('id',job.booking_id).maybeSingle();
+ if(error)return finish('failed','BOOKING_UNAVAILABLE');if(!b||b.status!=='confirmed'||b.event_type.startsWith('Buffet Ramadan'))return finish('skipped','NO_LONGER_CONFIRMED');
+ recipient=b.email;if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(recipient))return finish('failed','INVALID_RECIPIENT');message=confirmationEmail(b);
+ }
+ const mail=nodemailer.createTransport({host:'smtp.gmail.com',port:465,secure:true,auth:{user:'tipgroupmarketing@gmail.com',pass},connectionTimeout:6000,greetingTimeout:6000,socketTimeout:10000,logger:false,debug:false});
+ try{const result=await mail.sendMail({from:{name:'TI Properties',address:'tipgroupmarketing@gmail.com'},to:recipient,subject:message.subject,text:message.text,disableFileAccess:true,disableUrlAccess:true,messageId:'<'+job.id+'@ti-properties-booking-portal.netlify.app>'});if(!result.accepted?.length)return finish('failed','RECIPIENT_REJECTED');return await finish('accepted',null,result.messageId)}catch(e){const code=(e as {code?:string}).code;return finish(code==='EAUTH'?'failed':'review',code==='EAUTH'?'GMAIL_AUTH_REJECTED':'SMTP_OUTCOME_NEEDS_REVIEW')}finally{mail.close()}
+}

@@ -1,0 +1,5 @@
+import {randomUUID} from 'node:crypto';import {serverDb} from './server-db';import {digest,randomToken,verificationCode,codeDigest} from './portal-security.mjs';import {limit,networkKey} from './portal-api';import {processOneEmail} from './email-worker';
+export async function startVerification(req:Request,email:string,purpose:'booking'|'quote',payload:Record<string,unknown>|null,quoteId:string|null){
+ const net=networkKey(req);await limit('otp-ip:'+net,12,3600);await limit('otp-email-hour:'+email,5,3600);await limit('otp-email-minute:'+email,1,60);
+ const db=serverDb(),id=randomUUID(),token=randomToken();const {error}=await db.from('portal_verifications').insert({id,token_digest:digest(token),code_digest:codeDigest(id,verificationCode(id)),email,purpose,payload,quote_id:quoteId});if(error)throw Error('CHALLENGE_FAILED');const {data:job,error:j}=await db.from('email_outbox').insert({kind:'otp',verification_id:id}).select('id').single();if(j)throw Error('OTP_QUEUE_FAILED');const result=await processOneEmail(job.id);return {challenge:id,token,email_hint:email[0]+'***@'+email.split('@')[1],delivery:result.state,expires_in:600};
+}

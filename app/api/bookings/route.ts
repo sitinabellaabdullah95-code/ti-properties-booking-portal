@@ -1,3 +1,4 @@
+import {startVerification} from '../../../lib/portal-verifications';
 import {isElysiumSlot} from '../../../lib/event-slots.mjs';
 import {createHmac} from 'node:crypto';
 import {NextResponse} from 'next/server';
@@ -12,7 +13,6 @@ export async function POST(req:Request){
  if(venue.name==='Elysium Hall'&&clean.event_type!=='Buffet Ramadan — Pertanyaan'&&!isElysiumSlot(clean.start_time,clean.end_time))return NextResponse.json({error:'Sila pilih salah satu slot masa Elysium Hall yang disediakan.'},{status:400});
  if(venue.kind==='stay'&&(clean.end_date<=clean.event_date||clean.start_time!=='15:00'||clean.end_time!=='12:00'))return NextResponse.json({error:'Sila pilih tarikh masuk dan keluar yang sah.'},{status:400});
  if(venue.kind!=='stay'&&clean.end_date!==clean.event_date)return NextResponse.json({error:'Tempahan acara perlu pada hari yang sama.'},{status:400});
- const provider=process.env.HOSTING_PROVIDER||(process.env.VERCEL?'vercel':process.env.NETLIFY?'netlify':'local');const ip=provider==='netlify'?req.headers.get('x-nf-client-connection-ip')?.trim():provider==='vercel'?req.headers.get('x-vercel-forwarded-for')?.split(',')[0]?.trim():undefined;if(provider!=='local'&&!ip)throw Error('Missing trusted client address');const key=createHmac('sha256',process.env.SUPABASE_SERVICE_ROLE_KEY!).update((ip||'local')+new Date().toISOString().slice(0,10)).digest('hex');const {data,error}=await db.rpc('submit_enquiry',{payload:{...clean,rate_key:key}});if(error){if(error.message.includes('RATE_LIMIT'))return NextResponse.json({error:'Terlalu banyak permohonan. Cuba semula kemudian.'},{status:429});throw error;}
- return NextResponse.json({message:'Permohonan diterima untuk semakan admin. Belum disahkan.',reference:data},{status:201});
- }catch{return NextResponse.json({error:'Sistem belum tersedia. Sila cuba semula kemudian.'},{status:503});}
+ const provider=process.env.HOSTING_PROVIDER||(process.env.VERCEL?'vercel':process.env.NETLIFY?'netlify':'local');const ip=provider==='netlify'?req.headers.get('x-nf-client-connection-ip')?.trim():provider==='vercel'?req.headers.get('x-vercel-forwarded-for')?.split(',')[0]?.trim():undefined;if(provider!=='local'&&!ip)throw Error('Missing trusted client address');const key=createHmac('sha256',process.env.SUPABASE_SERVICE_ROLE_KEY!).update((ip||'local')+new Date().toISOString().slice(0,10)).digest('hex');const challenge=await startVerification(req,clean.email,'booking',{...clean,rate_key:key},null);return NextResponse.json({...challenge,message:'Sahkan e-mel untuk meneruskan permohonan.'},{status:202});
+ }catch(e){if(e instanceof Response)return e;return NextResponse.json({error:'Sistem belum tersedia. Sila cuba semula kemudian.'},{status:503});}
 }

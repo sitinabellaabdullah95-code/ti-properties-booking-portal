@@ -10,15 +10,17 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@supabase/supabase-js": "2.117.3",
     "next": "15.5.28",
+    "nodemailer": "10.1.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "@supabase/supabase-js": "2.117.3",
     "server-only": "^0.0.1"
   },
   "devDependencies": {
-    "typescript": "^5.8.0",
     "@types/node": "^22.0.0",
-    "@types/react": "^19.0.0"
+    "@types/nodemailer": "8.0.2",
+    "@types/react": "^19.0.0",
+    "typescript": "^5.8.0"
   }
 }

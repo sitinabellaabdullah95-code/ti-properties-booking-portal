@@ -535,7 +535,14 @@
     "Had percubaan dicapai. Minta kod baharu.": "Attempt limit reached. Request a new code.",
     "Kod salah atau tidak lagi sah.": "The code is incorrect or no longer valid.",
     "Kod salah atau sudah digunakan.": "The code is incorrect or already used.",
-    "Sewaan Dewan Elysium Hall | TI Properties": "Elysium Hall Rental | TI Properties"
+    "Sewaan Dewan Elysium Hall | TI Properties": "Elysium Hall Rental | TI Properties",
+    "GAMBAR SEBENAR": "REAL VENUE PHOTOS",
+    "Lihat semua gambar ↗": "View all photos ↗",
+    "Gambar belum tersedia. Lihat galeri atau hubungi pasukan kami.": "Photos are unavailable. Browse the gallery or contact our team.",
+    "Gambar rujukan daripada TI Properties. Susun atur acara dan akses lawatan tertakluk kepada pengesahan.": "Reference photos supplied by TI Properties. Event layouts and tour access are subject to confirmation.",
+    "Suasana sebenar Elysium Hall": "Inside Elysium Hall",
+    "Semua gambar": "All photos",
+    "Pemandangan Drawbridge": "Drawbridge views"
   },
   "ms": {
     "ELYSIUM HALL BOOKING FORM": "BORANG TEMPAHAN ELYSIUM HALL",
@@ -640,6 +647,7 @@
     "Service Style tidak sah.": "Gaya sajian tidak sah.",
     "Meal Type tidak sah.": "Jenis hidangan tidak sah.",
     "Quotation Required By perlu antara hari ini dan tarikh acara.": "Tarikh sebutharga diperlukan mesti antara hari ini dan tarikh acara.",
-    "Elysium Hall Rental | TI Properties": "Sewaan Dewan Elysium Hall | TI Properties"
+    "Elysium Hall Rental | TI Properties": "Sewaan Dewan Elysium Hall | TI Properties",
+    "Gallery sections": "Bahagian galeri"
   }
 }

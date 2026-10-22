@@ -651,7 +651,10 @@
     "Hantar ujian ke e-mel korporat": "Send corporate email test",
     "Notifikasi permohonan ke korporat": "Corporate booking notification",
     "E-mel pelanggan kekal dihantar kepada pelanggan. CC korporat hanya untuk notifikasi dalaman; kod OTP dan pautan peribadi pelanggan tidak di-CC.": "Customer emails continue to go to customers. Corporate CC applies only to internal notifications; customer OTPs and private links are not copied.",
-    "Laporan Booking": "Booking reports"
+    "Laporan Booking": "Booking reports",
+    "Slot disekat": "Slots blocked",
+    " · Disekat": " · Blocked",
+    "Tempahan Disahkan menyekat slot secara automatik. Kalendar dikemas kini setiap 15 saat.": "Confirmed bookings automatically block their slots. The calendar refreshes every 15 seconds."
   },
   "ms": {
     "ELYSIUM HALL BOOKING FORM": "BORANG TEMPAHAN ELYSIUM HALL",

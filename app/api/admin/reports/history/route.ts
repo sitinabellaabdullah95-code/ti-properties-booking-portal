@@ -1,0 +1,4 @@
+import {NextResponse} from 'next/server';
+import {adminDb,apiError,readJson,requireOrigin} from '../../../../../lib/portal-api';
+import {parseHistoryAmounts} from '../../../../../lib/booking-report';
+export async function POST(req:Request){try{requireOrigin(req);const db=await adminDb(req);let input;try{input=parseHistoryAmounts(await readJson(req,2000));}catch{return NextResponse.json({error:'Masukkan nilai RM yang sah, maksimum dua tempat perpuluhan.'},{status:400});}const {data,error}=await db.from('booking_report_archive').update({amounts_overridden:true,confirm_amount:input.amounts[0],tentative_amount:input.amounts[1],cancel_amount:input.amounts[2],amount_updated_at:new Date().toISOString()}).eq('id',input.id).select('id').maybeSingle();if(error)throw error;if(!data)return NextResponse.json({error:'Rekod laporan tidak dijumpai.'},{status:404});return NextResponse.json({ok:true},{headers:{'Cache-Control':'no-store'}});}catch(e){return apiError(e);}}

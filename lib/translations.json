@@ -645,7 +645,11 @@
     "RM110+ / seorang": "RM110+ / person",
     "Slot masa": "Time slots",
     "Susun atur": "Seating layouts",
-    "Gunakan nombor rujukan ini pada PDF sebelum memuat naik: ": "Use this reference on the PDF before uploading: "
+    "Gunakan nombor rujukan ini pada PDF sebelum memuat naik: ": "Use this reference on the PDF before uploading: ",
+    "Notifikasi tempahan baharu: ": "New booking notifications: ",
+    "E-mel pelanggan kekal dihantar kepada pelanggan. Balasan e-mel diarahkan ke alamat korporat.": "Customer emails continue to go to customers. Email replies are directed to the corporate address.",
+    "Hantar ujian ke e-mel korporat": "Send corporate email test",
+    "Notifikasi permohonan ke korporat": "Corporate booking notification"
   },
   "ms": {
     "ELYSIUM HALL BOOKING FORM": "BORANG TEMPAHAN ELYSIUM HALL",

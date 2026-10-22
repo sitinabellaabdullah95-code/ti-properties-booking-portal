@@ -1,0 +1,14 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import fs from 'node:fs';
+import ts from 'typescript';
+const code=ts.transpile(fs.readFileSync(new URL('../lib/booking-report.ts',import.meta.url),'utf8'),{module:ts.ModuleKind.ES2022,target:ts.ScriptTarget.ES2020});
+const {reportRow,reportStatus,reportTotals,parseReportDetails}=await import('data:text/javascript;base64,'+Buffer.from(code).toString('base64'));
+const base={id:'33b2196b-5ec9-4565-a93b-740c247c7ee0',public_reference:'TIP/DB/QUO/26/187',event_date:'2026-10-22',organisation:'=HYPERLINK("https://example.com")',customer_name:'Customer',pax:20,event_type:'Seminar',status:'confirmed',venues:{name:'Elysium Hall'}};
+const detail={booking_id:base.id,amount:108,sst_rate:8,sector:'PRIVATE',payment_method:'Transfer',sales_person:'Sales',ops_incharge:'Ops',remarks:''};
+test('report maps all supported statuses and fails closed for unknown',()=>{for(const s of ['confirmed','completed'])assert.equal(reportStatus(s),0);for(const s of ['pending','quoted','awaiting_payment'])assert.equal(reportStatus(s),1);for(const s of ['cancelled','rejected'])assert.equal(reportStatus(s),2);assert.throws(()=>reportStatus('invented'));});
+test('amount follows status without duplicating revenue; CODE remains sector',()=>{const row=reportRow({...base,status:'cancelled',report:detail},0);assert.equal(row.length,14);assert.equal(row[3],'PRIVATE');assert.deepEqual(row.slice(5,8),[null,null,108]);assert.equal(row[2],base.organisation);});
+test('blank amount is unknown while zero is entered',()=>{assert.equal(reportTotals([base]).missing,1);assert.equal(reportTotals([{...base,report:{...detail,amount:0}}]).missing,0);assert.equal(reportRow(base,0)[5],null);});
+test('SST uses each confirmed booking rate and excludes tentative and cancelled',()=>{const rows=[{...base,report:detail},{...base,report:{...detail,amount:106,sst_rate:6}},{...base,status:'pending',report:{...detail,amount:500}},{...base,status:'cancelled',report:{...detail,amount:900}}];const t=reportTotals(rows);assert.deepEqual(t.totals,[214,500,900]);assert.equal(t.tax,14);assert.equal(t.net,200);assert.equal(t.taxMissing,0);});
+test('missing SST is reported instead of assumed',()=>{assert.equal(reportTotals([{...base,report:{...detail,sst_rate:null}}]).taxMissing,1);});
+test('admin detail validation rejects invalid money and limits text',()=>{assert.equal(parseReportDetails(detail).amount,108);for(const value of [-1,Infinity,'100',0.001,100000001])assert.throws(()=>parseReportDetails({...detail,amount:value}));assert.throws(()=>parseReportDetails({...detail,booking_id:'bad'}));assert.throws(()=>parseReportDetails({...detail,sector:'x'.repeat(81)}));});

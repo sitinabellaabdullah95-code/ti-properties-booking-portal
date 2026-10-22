@@ -642,7 +642,9 @@
     "RM90+ / seorang": "RM90+ / person",
     "RM130+ / seorang": "RM130+ / person",
     "RM180+ / seorang": "RM180+ / person",
-    "RM110+ / seorang": "RM110+ / person"
+    "RM110+ / seorang": "RM110+ / person",
+    "Slot masa": "Time slots",
+    "Susun atur": "Seating layouts"
   },
   "ms": {
     "ELYSIUM HALL BOOKING FORM": "BORANG TEMPAHAN ELYSIUM HALL",
@@ -748,6 +750,17 @@
     "Meal Type tidak sah.": "Jenis hidangan tidak sah.",
     "Quotation Required By perlu antara hari ini dan tarikh acara.": "Tarikh sebutharga diperlukan mesti antara hari ini dan tarikh acara.",
     "Elysium Hall Rental | TI Properties": "Sewaan Dewan Elysium Hall | TI Properties",
-    "Gallery sections": "Bahagian galeri"
+    "Gallery sections": "Bahagian galeri",
+    "Seminar & Meeting": "Seminar & Mesyuarat",
+    "Half Day Meeting": "Mesyuarat Separuh Hari",
+    "Full Day Meeting": "Mesyuarat Sehari Penuh",
+    "Buffet Hi-Tea": "Bufet Hi-Tea",
+    "Dome Set Hi-Tea": "Dome Set Hi-Tea",
+    "Buffet Lunch / Dinner": "Bufet Makan Tengah Hari / Malam",
+    "Dome Set Lunch / Dinner": "Dome Set Makan Tengah Hari / Malam",
+    "Tea Break": "Rehat Minum",
+    "Lunch Buffet": "Bufet Makan Tengah Hari",
+    "Dinner Buffet": "Bufet Makan Malam",
+    "Lunch & Dinner": "Makan Tengah Hari & Malam"
   }
 }

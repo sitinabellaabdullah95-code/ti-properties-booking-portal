@@ -1,0 +1,3 @@
+import test from 'node:test';import assert from 'node:assert/strict';
+import {MAIN_HALL,VVIP_ROOM,isElysiumRoom,roomLabel,validateRoomGuests} from '../lib/elysium-rooms.mjs';
+test('two Elysium rooms have distinct labels and VVIP enforces 8–10 guests',()=>{assert.equal(roomLabel('Elysium Hall'),MAIN_HALL);assert.ok(isElysiumRoom(VVIP_ROOM));assert.ok(!isElysiumRoom('Gallery'));for(const n of [8,9,10])assert.doesNotThrow(()=>validateRoomGuests(VVIP_ROOM,n));for(const n of [0,1,7,11,100,8.5])assert.throws(()=>validateRoomGuests(VVIP_ROOM,n));assert.doesNotThrow(()=>validateRoomGuests('Elysium Hall',50));});

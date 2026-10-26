@@ -33,7 +33,7 @@ export default function BookingPortal({ mode = "all", preferredRoom = "" }: {
     const [verification, setVerification] = useState<any>(null), [otp, setOtp] = useState(''), [pendingPayload, setPendingPayload] = useState<Record<string, unknown> | null>(null), [pendingSummary, setPendingSummary] = useState<any>(null), [tracking, setTracking] = useState('');
     const [visit, setVisit] = useState('Daily Visit Gallery');
     const stay = venues.find(v => v.id === venueId)?.kind === 'stay';
-    useEffect(() => { import('../lib/supabase').then(({ publicDb }) => publicDb().from('venues').select('id,name,location,kind').eq('active', true).eq('location','Kuala Terengganu Drawbridge').order('location')).then(({ data, error }) => { if (error)
+    useEffect(() => { import('../lib/supabase').then(({ publicDb }) => publicDb().from('venues').select('id,name,location,kind').eq('active', true).in('location',['KT Drawbridge','Kuala Terengganu Drawbridge']).order('location')).then(({ data, error }) => { if (error)
         throw error; const all = data || []; setVenues(all); if (mode === 'events' || mode === 'ramadan')
         setVenueId(all.find(v => v.name === 'Elysium Hall')?.id || ''); if (mode === 'kijal')
         setVenueId(all.find(v => v.kind === 'stay')?.id || ''); if (mode === 'gallery')

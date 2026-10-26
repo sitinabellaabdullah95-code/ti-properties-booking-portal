@@ -52,7 +52,7 @@ export default function Admin() {
             return;
         }
         setAllowed(true);
-        const [b, u] = await Promise.all([db.from('bookings').select('public_reference,email_verified_at,id,venue_id,unit_id,customer_name,email,phone,organisation,event_type,event_date,end_date,start_time,end_time,pax,notes,status,venues!inner(name,location)').eq('venues.location','Kuala Terengganu Drawbridge').order('event_date', { ascending: true }), db.from('units').select('id,venue_id,name,venues!inner(location)').eq('venues.location','Kuala Terengganu Drawbridge').eq('active', true).order('name')]);
+        const [b, u] = await Promise.all([db.from('bookings').select('public_reference,email_verified_at,id,venue_id,unit_id,customer_name,email,phone,organisation,event_type,event_date,end_date,start_time,end_time,pax,notes,status,venues!inner(name,location)').in('venues.location',['KT Drawbridge','Kuala Terengganu Drawbridge']).order('event_date', { ascending: true }), db.from('units').select('id,venue_id,name,venues!inner(location)').in('venues.location',['KT Drawbridge','Kuala Terengganu Drawbridge']).eq('active', true).order('name')]);
         if (b.error || u.error)
             throw Error();
         setRows((b.data || []) as unknown as Booking[]);

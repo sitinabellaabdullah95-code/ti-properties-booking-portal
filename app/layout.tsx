@@ -1,4 +1,5 @@
 import './style.css';
+import './corporate.css';
 import type {Metadata} from 'next';
 import OptionalAnalytics from '../components/OptionalAnalytics';
 import {LanguageProvider} from '../components/Language';

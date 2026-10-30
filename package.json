@@ -16,7 +16,8 @@
     "nodemailer": "10.1.2",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "server-only": "^0.0.1"
+    "server-only": "^0.0.1",
+    "jszip": "3.10.2"
   },
   "devDependencies": {
     "@types/node": "^22.0.0",

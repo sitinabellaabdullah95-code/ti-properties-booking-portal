@@ -1,19 +1,5 @@
 'use client';
-import {T, LocalizedAttributes} from "../../../components/Language";
-import Brand from '../../../components/Brand';
-import { useState } from 'react';
-import { useRouter } from 'next/navigation';
-import { publicDb } from '../../../lib/supabase';
-export default function Login() { const router = useRouter(), [error, setError] = useState(''), [busy, setBusy] = useState(false); async function login(e: React.FormEvent<HTMLFormElement>) { e.preventDefault(); setBusy(true); const d = new FormData(e.currentTarget); try {
-    const db = publicDb();
-    const { error } = await db.auth.signInWithPassword({ email: String(d.get('email')), password: String(d.get('password')) });
-    if (error)
-        throw error;
-    router.push('/admin');
-}
-catch (e) {
-    setError('Log masuk gagal. Semak e-mel dan kata laluan anda.');
-}
-finally {
-    setBusy(false);
-} } return <main><Brand /><h1><T>{"Log masuk admin"}</T></h1><form className="panel" onSubmit={login}><label><T>{"E-mel"}</T></label><LocalizedAttributes><input aria-label="E-mel" autoComplete="username" type="email" name="email" required/></LocalizedAttributes><label><T>{"Kata laluan"}</T></label><LocalizedAttributes><input aria-label="Kata laluan" autoComplete="current-password" type="password" name="password" required/></LocalizedAttributes><T>{error && <p className="error"><T>{error}</T></p>}</T><button disabled={busy}><T>{"Log masuk"}</T></button></form></main>; }
+import {T,LocalizedAttributes} from '../../../components/Language';import Brand from '../../../components/Brand';import {useState} from 'react';import {useRouter} from 'next/navigation';import {publicDb} from '../../../lib/supabase';
+export default function Login(){const router=useRouter(),[error,setError]=useState(''),[busy,setBusy]=useState(false),[sent,setSent]=useState(false),[email,setEmail]=useState('');async function login(e:React.FormEvent<HTMLFormElement>){e.preventDefault();setBusy(true);setError('');const d=new FormData(e.currentTarget);try{const {error}=await publicDb().auth.signInWithPassword({email,password:String(d.get('password'))});if(error)throw error;router.push(['nabella@tiproperties.my','farhana@tiproperties.my','bella.aatsb@gmail.com'].includes(email.toLowerCase())||location.search.includes('quotation-digital')?'/admin/quotation-digital':'/admin');}catch{setError('Log masuk gagal. Semak e-mel dan kata laluan anda.');}finally{setBusy(false);}}
+async function emailLogin(){setBusy(true);setError('');try{if(!['tipgroupmarketing@gmail.com','nabella@tiproperties.my','farhana@tiproperties.my','bella.aatsb@gmail.com'].includes(email.toLowerCase().trim()))throw Error('Gunakan e-mel yang diberikan akses.');const {error}=await publicDb().auth.signInWithOtp({email:email.trim(),options:{emailRedirectTo:location.origin+'/admin/quotation-digital',shouldCreateUser:true}});if(error)throw error;setSent(true);}catch{setError('Pautan log masuk belum dapat dihantar. Semak e-mel atau cuba semula kemudian.');}finally{setBusy(false);}}
+return <main><Brand/><h1><T>Log masuk admin</T></h1><p><T>Satu login untuk portal tempahan dan Quotation Digital.</T></p><form className="panel" onSubmit={login}><label htmlFor="admin-email"><T>E-mel</T></label><input id="admin-email" autoComplete="username" type="email" name="email" value={email} onChange={e=>setEmail(e.target.value)} required/><label htmlFor="admin-password"><T>Kata laluan</T></label><input id="admin-password" autoComplete="current-password" type="password" name="password" required/>{error&&<p className="error" role="alert">{error}</p>}<button disabled={busy}><T>Log masuk</T></button><hr/><p><T>Belum menetapkan kata laluan? Gunakan pautan selamat melalui e-mel.</T></p><button className="secondary" type="button" disabled={busy||!email} onClick={()=>void emailLogin()}><T>Hantar pautan log masuk</T></button>{sent&&<p role="status"><T>Semak Inbox atau Spam. Buka pautan e-mel pada pelayar yang sama untuk masuk ke Quotation Digital.</T></p>}</form></main>}

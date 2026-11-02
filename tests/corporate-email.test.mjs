@@ -16,5 +16,6 @@ test('only internal booking notifications and harmless tests CC corporate; custo
  assert.equal(TIP_BOOKING_EMAIL,'tipgroupmarketing@gmail.com');
  assert.equal(bookingNotificationCc('corporate_booking'),CORPORATE_BOOKING_EMAIL);
  assert.equal(bookingNotificationCc('test'),CORPORATE_BOOKING_EMAIL);
- for(const kind of ['otp','quote','receipt','confirmation'])assert.equal(bookingNotificationCc(kind),undefined);
+ assert.equal(bookingNotificationCc('quote'),'farhana@tiproperties.my');for(const kind of ['otp','receipt','confirmation'])assert.equal(bookingNotificationCc(kind),undefined);
 });
+

@@ -18,5 +18,6 @@ test('bilingual customer emails preserve code, private link and unconfirmed book
  const otp=verificationEmail({purpose:'booking'},'123456');assert.match(otp.text,/10 minutes/);assert.match(otp.text,/10 minit/);assert.match(otp.text,/123456/);
  const b={id:'TEST-REF',customer_name:'Test customer',event_date:'2026-12-30'};
  const receipt=receiptEmail(b,'https://example.test/private');assert.match(receipt.text,/BELUM disahkan/);assert.match(receipt.text,/NOT yet confirmed/);assert.match(receipt.text,/https:\/\/example.test\/private/);
- const quote=quotationEmail(b,{message:'Original message'},'https://example.test/quote');assert.match(quote.text,/Original message/);assert.match(quote.text,/does not confirm a booking/);assert.match(quote.text,/tidak mengesahkan tempahan/);
+ const quote=quotationEmail(b,{message:'Original message'},'https://example.test/quote');assert.match(quote.text,/Original message/);assert.match(quote.text,/does not confirm your booking/);assert.match(quote.text,/No login or verification code is required/);
 });
+

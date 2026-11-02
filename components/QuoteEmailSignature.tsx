@@ -1,0 +1,4 @@
+'use client';
+import {useEffect,useState} from 'react';import {publicDb} from '../lib/supabase';
+export default function QuoteEmailSignature(){const [src,setSrc]=useState('');useEffect(()=>{let active=true,url='';(async()=>{try{const {data:{session}}=await publicDb().auth.getSession();if(!session)return;const r=await fetch('/api/admin/quote-signature',{headers:{authorization:'Bearer '+session.access_token},cache:'no-store'});if(!r.ok)return;url=URL.createObjectURL(await r.blob());if(active)setSrc(url);else URL.revokeObjectURL(url);}catch{}})();return()=>{active=false;if(url)URL.revokeObjectURL(url);};},[]);return src?<div style={{margin:'12px 0'}}><small>Signature e-mel Bella</small><img src={src} alt="Siti Nabella Abdullah — Executive, Sales — TI Properties" style={{display:'block',width:640,maxWidth:'100%',height:'auto'}}/></div>:<p className="muted">Signature e-mel Bella disertakan secara automatik semasa penghantaran.</p>;}
+

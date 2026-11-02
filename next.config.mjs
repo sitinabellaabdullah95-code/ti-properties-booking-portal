@@ -3,11 +3,12 @@ export default {
   async headers() {
     return [{source: '/:path*', headers: [
       {key:'X-Content-Type-Options', value:'nosniff'},
-      {key:'X-Frame-Options', value:'DENY'},
-      {key:'Referrer-Policy', value:'strict-origin-when-cross-origin'},
+            {key:'Referrer-Policy', value:'strict-origin-when-cross-origin'},
       {key:'Permissions-Policy', value:'camera=(), microphone=(), geolocation=()'},
       {key:'Strict-Transport-Security', value:'max-age=31536000; includeSubDomains'},
+    ]},{source:'/:path((?!api/admin/digital(?:/|$)).*)',headers:[{key:'X-Frame-Options',value:'DENY'},
       {key:'Content-Security-Policy', value:"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self' https://*.supabase.co; frame-ancestors 'none'; base-uri 'self'; form-action 'self'"}
     ]},{source:'/api/admin/digital/:path*',headers:[{key:'X-Frame-Options',value:'SAMEORIGIN'},{key:'Content-Security-Policy',value:"default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self'; frame-ancestors 'self'; base-uri 'self'; form-action 'self'"}]}];
   }
 };
+

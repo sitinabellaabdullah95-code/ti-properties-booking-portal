@@ -1,3 +1,4 @@
+import './feedback.css';
 import './style.css';
 import './corporate.css';
 import type {Metadata} from 'next';

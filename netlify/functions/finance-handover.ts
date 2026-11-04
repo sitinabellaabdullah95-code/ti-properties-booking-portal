@@ -1,0 +1,3 @@
+import{createClient}from'@supabase/supabase-js';import{processFinance}from'../../lib/finance-store';
+export default async function(){try{if(!process.env.NEXT_PUBLIC_SUPABASE_URL||!process.env.SUPABASE_SERVICE_ROLE_KEY)return new Response('Unconfigured',{status:503});const db=createClient(process.env.NEXT_PUBLIC_SUPABASE_URL,process.env.SUPABASE_SERVICE_ROLE_KEY,{auth:{persistSession:false,autoRefreshToken:false}});return new Response(JSON.stringify(await processFinance(db)),{status:200});}catch{return new Response('Finance handover requires review',{status:503});}}
+export const config={schedule:'*/15 * * * *'};

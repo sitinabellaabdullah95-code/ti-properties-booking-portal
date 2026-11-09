@@ -1,0 +1,20 @@
+.executive-report .report-register-controls {
+  margin: 0 0 12px;
+  padding: 12px 14px;
+  border: 1px solid #dce5ee;
+  border-radius: 10px;
+  background: #f5f8fc;
+  scroll-margin-top: 85px;
+}
+.report-register-controls summary { cursor: pointer; font-weight: 700; }
+.report-register-controls .exec-register-filters { margin: 12px 0; }
+.report-register-controls ul {
+  display: grid;
+  gap: 6px;
+  max-height: 280px;
+  overflow: auto;
+  padding: 0;
+  list-style: none;
+}
+.report-register-controls li { overflow-wrap: anywhere; }
+.report-register-controls li button { margin: 3px 0 3px 8px; }

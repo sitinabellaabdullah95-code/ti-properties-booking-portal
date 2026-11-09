@@ -4,7 +4,7 @@ import {serverDb} from './server-db';
 import {digitalApprovalMessage} from './digital-approval-message.mjs';
 
 let approvalSignature:Promise<Buffer>|undefined;
-async function loadApprovalSignature(){
+export async function loadApprovalSignature(){
  if(!approvalSignature)approvalSignature=(async()=>{
   const {data,error}=await serverDb().storage.from('digital-documents').download('digital-editor-master-nov2026-v4.zip');
   if(error||!data)throw Error('SIGNATURE_UNAVAILABLE');

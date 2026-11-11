@@ -20,7 +20,7 @@ export async function POST(req:Request){try{requireOrigin(req);const {db,me}=awa
   const prior=await db.storage.from('digital-documents').download(auditPath);
   if(prior.data){try{const state=JSON.parse(await prior.data.text());if(state.state==='accepted')return NextResponse.json({...current,notification:'already_sent'},{headers});}catch{}}
   const notification=await notifyOperationEventOrder(current);
-  const audit={id:current.id,revision:current.revision,state,at:new Date().toISOString(),action,to:['fatin@tiproperties.my','farah@tiproperties.my'],signatureIncluded:true};
+  const audit={id:current.id,revision:current.revision,state:notification,at:new Date().toISOString(),action,to:['fatin@tiproperties.my','farah@tiproperties.my'],signatureIncluded:true};
   await db.storage.from('digital-documents').upload(auditPath,Buffer.from(JSON.stringify(audit)),{contentType:'application/octet-stream',upsert:true});
   return NextResponse.json({...current,notification},{headers});
  }

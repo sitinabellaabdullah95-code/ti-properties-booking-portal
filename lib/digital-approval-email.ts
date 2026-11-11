@@ -58,3 +58,19 @@ export async function notifyApprovedEventOrder(row:any){
   return result.accepted?.some((x:any)=>String(x).toLowerCase()==='fatin@tiproperties.my')?'accepted':'failed';
  }catch(e){return (e as {code?:string}).code==='EAUTH'?'failed':'review';}finally{mail.close();}
 }
+
+export async function notifyOperationEventOrder(row:any){
+ const pass=(process.env.GMAIL_APP_PASSWORD||'').replace(/\\s/g,'');
+ if(!/^[a-zA-Z]{16}$/.test(pass))return 'unconfigured';
+ const mail=nodemailer.createTransport({host:'smtp.gmail.com',port:465,secure:true,auth:{user:'tipgroupmarketing@gmail.com',pass},connectionTimeout:6000,greetingTimeout:6000,socketTimeout:10000,logger:false,debug:false});
+ const clean=(v:any)=>String(v||'—').replace(/[\\r\\n]+/g,' ').slice(0,250),escapeHtml=(v:any)=>String(v||'—').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+ const f=row.fields||{},url='https://ti-properties-booking-portal.netlify.app/admin/event-orders?order='+encodeURIComponent(row.id);
+ const subject='Approved Event Order & Internal — '+clean(f.ref)+' — '+clean(f.eventDate);
+ const text=['Dear Operation Team,','','Farhana has approved the Event Order and Internal document. Please refer to the approved record for the event arrangements.','','Reference No.: '+clean(f.ref),'Department / Company: '+clean(f.company),'Event: '+clean(f.eventType),'Date & Time: '+clean(f.eventDate)+' '+clean(f.time),'Venue: '+clean(f.venue),'Number of Guests: '+clean(f.pax),'','View the approved Event Order & Internal: '+url,'','Please use the approved details for operational preparation. Kindly contact us if any clarification is required.','','Thank you and regards,','Siti Nabella Abdullah','Executive, Sales','TI Properties Sdn Bhd'].join('\\n');
+ try{
+  const signature=await loadApprovalSignature();
+  const html='<p>Dear Operation Team,</p><p>Farhana has approved the Event Order and Internal document. Please refer to the approved record for the event arrangements.</p><p><b>Reference No.:</b> '+escapeHtml(clean(f.ref))+'<br><b>Department / Company:</b> '+escapeHtml(clean(f.company))+'<br><b>Event:</b> '+escapeHtml(clean(f.eventType))+'<br><b>Date &amp; Time:</b> '+escapeHtml(clean(f.eventDate)+' '+clean(f.time))+'<br><b>Venue:</b> '+escapeHtml(clean(f.venue))+'<br><b>Number of Guests:</b> '+escapeHtml(clean(f.pax))+'</p><p><a href="'+url+'">View the approved Event Order &amp; Internal</a></p><p>Please use the approved details for operational preparation. Kindly contact us if any clarification is required.</p><p>Thank you and regards,</p><p><img src="cid:nabella-operation-signature" alt="Siti Nabella Abdullah digital signature" style="max-width:360px;height:auto"></p><p><b>Siti Nabella Abdullah</b><br>Executive, Sales<br>TI Properties Sdn Bhd</p>';
+  const result=await mail.sendMail({from:{name:'TI Properties',address:'tipgroupmarketing@gmail.com'},to:['fatin@tiproperties.my','farah@tiproperties.my'],replyTo:'tipgroupmarketing@gmail.com',subject,text,html,attachments:[{filename:'Siti-Nabella-Signature.png',content:signature,contentType:'image/png',cid:'nabella-operation-signature',contentDisposition:'inline'}],disableFileAccess:true,disableUrlAccess:true,messageId:`<operation-event-order-${row.id}-v${row.revision}@ti-properties-booking-portal.netlify.app>`});
+  return result.accepted?.some((x:any)=>['fatin@tiproperties.my','farah@tiproperties.my'].includes(String(x).toLowerCase()))?'accepted':'failed';
+ }catch(e){return (e as {code?:string}).code==='EAUTH'?'failed':'review';}finally{mail.close();}
+}

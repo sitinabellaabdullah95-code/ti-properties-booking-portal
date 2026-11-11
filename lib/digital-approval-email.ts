@@ -39,23 +39,22 @@ export async function notifyDigitalApproval(row:any,message?:{subject:string;tex
 }
 
 export async function notifyApprovedEventOrder(row:any){
- const pass=(process.env.GMAIL_APP_PASSWORD||'').replace(/\s/g,'');
+ const pass=(process.env.GMAIL_APP_PASSWORD||'').replace(/\\s/g,'');
  if(!/^[a-zA-Z]{16}$/.test(pass))return 'unconfigured';
  const mail=nodemailer.createTransport({host:'smtp.gmail.com',port:465,secure:true,auth:{user:'tipgroupmarketing@gmail.com',pass},connectionTimeout:6000,greetingTimeout:6000,socketTimeout:10000,logger:false,debug:false});
- const clean=(v:any)=>String(v||'—').replace(/[\r\n]+/g,' ').slice(0,250),f=row.fields||{};
+ const clean=(v:any)=>String(v||'—').replace(/[\\r\\n]+/g,' ').slice(0,250),f=row.fields||{};
  const url='https://ti-properties-booking-portal.netlify.app/admin/event-orders?order='+encodeURIComponent(row.id);
  try{
   const result=await mail.sendMail({
    from:{name:'TI Properties',address:'tipgroupmarketing@gmail.com'},
-   to:'fatin@tiproperties.my',
-   cc:'corporateinnovationstrategy@tiproperties.my',
+   to:'nabella@tiproperties.my',
    replyTo:'tipgroupmarketing@gmail.com',
-   subject:'Approved Event Order & Internal — '+clean(f.ref),
-   text:['Dear Fatin,','','Farhana has approved the Event Order and Internal document. The approved record is available in the portal for review and printing as a two-page document.','','Reference No.: '+clean(f.ref),'Department / Organisation: '+clean(f.company),'Organiser: '+clean(f.organiser),'Event Type: '+clean(f.eventType),'Event Date: '+clean(f.eventDate)+(f.endDate&&f.endDate!==f.eventDate?' — '+clean(f.endDate):''),'Venue: '+clean(f.venue),'','Open approved Event Order & Internal: '+url,'','Please sign in with your authorised portal account to view the record.','','Thank you,','TI Properties Sdn Bhd'].join('\n'),
+   subject:'Approved Event Order & Internal — '+clean(f.ref)+' — '+clean(f.company),
+   text:['Dear Bella,','','The Event Order and Internal document has been approved and is available in the portal for your review and printing as a two-page document.','','Reference No.: '+clean(f.ref),'Department / Organisation: '+clean(f.company),'Organiser: '+clean(f.organiser),'Event Type: '+clean(f.eventType),'Event Date: '+clean(f.eventDate)+(f.endDate&&f.endDate!==f.eventDate?' — '+clean(f.endDate):''),'Venue: '+clean(f.venue),'','Open Event Order & Internal: '+url,'','Please sign in with your authorised portal account to view the record.','','Thank you,','TI Properties Sdn Bhd'].join('\\n'),
    disableFileAccess:true,disableUrlAccess:true,
    messageId:`<approved-event-order-${row.id}-v${row.revision}@ti-properties-booking-portal.netlify.app>`
   });
-  return result.accepted?.some((x:any)=>String(x).toLowerCase()==='fatin@tiproperties.my')?'accepted':'failed';
+  return result.accepted?.some((x:any)=>String(x).toLowerCase()==='nabella@tiproperties.my')?'accepted':'failed';
  }catch(e){return (e as {code?:string}).code==='EAUTH'?'failed':'review';}finally{mail.close();}
 }
 

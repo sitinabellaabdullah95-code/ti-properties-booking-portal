@@ -5,6 +5,7 @@ import {requireOrigin,readJson,apiError} from '../../../../lib/portal-api';
 import {eventOrderTransition,eventOrderApprovalMessage} from '../../../../lib/event-order-approval.mjs';
 import {notifyDigitalApproval,notifyApprovedEventOrder,notifyOperationEventOrder} from '../../../../lib/digital-approval-email';
 import {validateEventOrder} from '../../../../lib/event-order.mjs';
+import {eventOrderCombinedPdf} from '../../../../lib/event-order-pdf-runtime';
 export const runtime='nodejs';export const dynamic='force-dynamic';
 const headers={'Cache-Control':'private, no-store'};
 async function files(db:any,search?:string){const bucket=db.storage.from('digital-documents'),all:any[]=[];for(let offset=0;offset<10000;offset+=1000){const {data,error}=await bucket.list('event-orders',{limit:1000,offset,search,sortBy:{column:'name',order:'asc'}});if(error)throw error;all.push(...data.filter((f:any)=>/^[a-f0-9-]{36}--\d{6}\.json$/.test(f.name)));if(data.length<1000)return all;}throw Error('Had rekod dicapai.');}
@@ -19,8 +20,9 @@ export async function POST(req:Request){try{requireOrigin(req);const {db,me}=awa
   const auditPath='event-order-notices/'+current.id+'--operation.json';
   const prior=await db.storage.from('digital-documents').download(auditPath);
   if(prior.data){try{const state=JSON.parse(await prior.data.text());if(state.state==='accepted')return NextResponse.json({...current,notification:'already_sent'},{headers});}catch{}}
-  const notification=await notifyOperationEventOrder(current);
-  const audit={id:current.id,revision:current.revision,state:notification,at:new Date().toISOString(),action,to:['fatin@tiproperties.my','farah@tiproperties.my'],signatureIncluded:true};
+  const approvedPdf=await eventOrderCombinedPdf(db,current);
+  const notification=await notifyOperationEventOrder(current,approvedPdf);
+  const audit={id:current.id,revision:current.revision,state:notification,at:new Date().toISOString(),action,to:['fatin@tiproperties.my','farah@tiproperties.my'],pdfAttachmentIncluded:true,portalLinkIncluded:false};
   await db.storage.from('digital-documents').upload(auditPath,Buffer.from(JSON.stringify(audit)),{contentType:'application/octet-stream',upsert:true});
   return NextResponse.json({...current,notification},{headers});
  }

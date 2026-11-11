@@ -3,7 +3,7 @@ import {NextResponse} from 'next/server';
 import {digitalIdentity} from '../../../../lib/digital-store';
 import {requireOrigin,readJson,apiError} from '../../../../lib/portal-api';
 import {eventOrderTransition,eventOrderApprovalMessage} from '../../../../lib/event-order-approval.mjs';
-import {notifyDigitalApproval,notifyOperationEventOrder} from '../../../../lib/digital-approval-email';
+import {notifyDigitalApproval,notifyApprovedEventOrder,notifyOperationEventOrder} from '../../../../lib/digital-approval-email';
 import {validateEventOrder,syncInternalBreakdownFromBilling} from '../../../../lib/event-order.mjs';
 import {eventOrderCombinedPdf} from '../../../../lib/event-order-pdf-runtime';
 export const runtime='nodejs';export const dynamic='force-dynamic';
@@ -27,9 +27,9 @@ export async function POST(req:Request){try{requireOrigin(req);const {db,me}=awa
   return NextResponse.json({...current,notification},{headers});
  }
  let next;try{next=eventOrderTransition(current,action,me.role,raw.comment||'');}catch(e:any){return NextResponse.json({error:e.message},{status:e.status||400});}const saved={...next,revision:current.revision+1,updatedAt:new Date().toISOString(),updatedBy:me.email};await persist(db,saved);let notification='not_requested';if(action==='submit')notification=await notifyDigitalApproval(saved,eventOrderApprovalMessage(saved));
- if(action==='approve')notification='not_requested';
+ if(action==='approve')notification=await notifyApprovedEventOrder(saved);
  if(action==='submit'||action==='approve'){
-  const audit={id:saved.id,revision:saved.revision,state:notification,at:new Date().toISOString(),action,to:action==='approve'?'fatin@tiproperties.my':'farhana@tiproperties.my',cc:action==='approve'?'corporateinnovationstrategy@tiproperties.my':null};
+  const audit={id:saved.id,revision:saved.revision,state:notification,at:new Date().toISOString(),action,to:action==='approve'?'nabella@tiproperties.my':'farhana@tiproperties.my',cc:null};
   const {error}=await db.storage.from('digital-documents').upload('event-order-notices/'+saved.id+'--'+saved.revision+'.json',Buffer.from(JSON.stringify(audit)),{contentType:'application/octet-stream',upsert:false});
   if(error&&notification==='not_requested')notification='audit_unavailable';
  }

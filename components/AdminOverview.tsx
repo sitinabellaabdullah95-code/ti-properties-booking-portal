@@ -10,6 +10,7 @@ import {roomLabel} from '../lib/elysium-rooms.mjs';
 import {activeStatuses, blocksCalendar} from '../lib/workspace.mjs';
 import {translateText} from '../lib/language-core.mjs';
 import styles from './AdminOverview.module.css';
+import {time12} from '../lib/event-slots.mjs';
 
 const shortcuts = [
   ['/admin/bookings', 'check', 'blue'],
@@ -144,7 +145,7 @@ export default function AdminOverview() {
             <div className={styles.weekSummary}><strong>{showCount(upcoming.length)}</strong><span>{tx('tempahan akan datang','upcoming bookings')}</span></div>
             {upcoming.slice(0,4).map(b => <Link className={styles.event} key={b.id} href={bookingHref(b.public_reference)}>
               <time dateTime={b.event_date}>{formatDate(b.event_date,{day:'numeric',month:'short'})}</time>
-              <span className={styles.itemText}><strong><T>{b.event_type}</T></strong><small>{b.start_time.slice(0,5)} · {venueName(b.venue_id)}</small></span>
+              <span className={styles.itemText}><strong><T>{b.event_type}</T></strong><small>{time12(b.start_time)} · {venueName(b.venue_id)}</small></span>
             </Link>)}
             {data && !upcoming.length && <p className={styles.empty}>{tx('Tiada acara dijadualkan.','No events scheduled.')}</p>}
             <Link className={styles.panelLink} href="/admin/calendar"><T>Kalendar ruang</T> →</Link>

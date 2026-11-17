@@ -1,5 +1,6 @@
 'use client';
 import {roomLabel} from '../../../lib/elysium-rooms.mjs';
+import {time12} from '../../../lib/event-slots.mjs';
 import {T, LocalizedAttributes} from "../../../components/Language";
 import AdminShell from '../../../components/AdminShell';
 import Brand from '../../../components/Brand';

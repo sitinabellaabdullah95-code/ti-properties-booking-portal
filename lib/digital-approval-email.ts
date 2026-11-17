@@ -6,7 +6,7 @@ import {digitalApprovalMessage} from './digital-approval-message.mjs';
 let approvalSignature:Promise<Buffer>|undefined;
 export async function loadApprovalSignature(){
  if(!approvalSignature)approvalSignature=(async()=>{
-  const {data,error}=await serverDb().storage.from('digital-documents').download('digital-editor-master-nov2026-v4.zip');
+  const {data,error}=await serverDb().storage.from('digital-documents').download('digital-editor-master-nov2026-v6.zip');
   if(error||!data)throw Error('SIGNATURE_UNAVAILABLE');
   const zip=await JSZip.loadAsync(await data.arrayBuffer());
   const file=zip.file('originals.json');

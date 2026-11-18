@@ -4,7 +4,8 @@ import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import Brand from '../../../components/Brand';
 import Link from 'next/link';
-function time12(value?: string | null) { const match = /^(\\d{1,2}):(\\d{2})/.exec(value || ''); if (!match) return value || ''; const hour = Number(match[1]); return `${hour % 12 || 12}:${match[2]} ${hour < 12 ? 'AM' : 'PM'}`; }\nconst labels: Record<string, string> = { pending: 'Menunggu semakan', quoted: 'Sebutharga disediakan', awaiting_payment: 'Menunggu bayaran', confirmed: 'Disahkan', completed: 'Selesai', rejected: 'Tidak diluluskan', cancelled: 'Dibatalkan' };
+function time12(value?: string | null) { const match = /^(\d{1,2}):(\d{2})/.exec(value || ''); if (!match) return value || ''; const hour = Number(match[1]); return `${hour % 12 || 12}:${match[2]} ${hour < 12 ? 'AM' : 'PM'}`; }
+const labels: Record<string, string> = { pending: 'Menunggu semakan', quoted: 'Sebutharga disediakan', awaiting_payment: 'Menunggu bayaran', confirmed: 'Disahkan', completed: 'Selesai', rejected: 'Tidak diluluskan', cancelled: 'Dibatalkan' };
 export default function Tracking() { const { id } = useParams<{
     id: string;
 }>(), [row, setRow] = useState<any>(null), [error, setError] = useState(''), [busy, setBusy] = useState(false); const endpoint = () => '/api/tracking/' + id + '?t=' + new URLSearchParams(window.location.search).get('t'); async function load() { const r = await fetch(endpoint(), { cache: 'no-store' }); if (!r.ok)

@@ -12,18 +12,23 @@ export default function DigitalEditor({documentType='quotation'}:{documentType?:
  const {language}=useLanguage(),tx=(a:string,b:string)=>language==='en'?b:a;
  const isConfirmation=documentType==='confirmation';
  const frame=useRef<HTMLIFrameElement>(null);
- const [ready,setReady]=useState(false),[editorHtml,setEditorHtml]=useState(''),[error,setError]=useState(''),[notice,setNotice]=useState(''),[sending,setSending]=useState(false),[quotationId,setQuotationId]=useState(''),[editorModeReady,setEditorModeReady]=useState(false);
+ const [ready,setReady]=useState(false),[editorHtml,setEditorHtml]=useState(''),[error,setError]=useState(''),[notice,setNotice]=useState(''),[sending,setSending]=useState(false),[quotationId,setQuotationId]=useState(''),[editorModeReady,setEditorModeReady]=useState(false),[confirmationFormats,setConfirmationFormats]=useState<Array<{value:string;label:string}>>([]),[selectedFormat,setSelectedFormat]=useState('');
  async function resend(){if(sending)return;setSending(true);setNotice('Menghantar notifikasi…');try{const id=new URLSearchParams(location.search).get('quotation');const r=await fetch('/api/admin/digital/quotations/'+encodeURIComponent(id||'')+'/notify',{method:'POST'});const d=await r.json();setNotice(d.message||d.error||'Sila semak sejarah.');}catch{setNotice('Keputusan penghantaran belum diketahui. Semak sejarah sebelum cuba lagi.');}finally{setSending(false);}}
  function setEditorType(){
-  if(new URLSearchParams(location.search).has('quotation')){setEditorModeReady(true);return true;}
   const doc=frame.current?.contentDocument;
   const selector=doc?.querySelector<HTMLSelectElement>('#documentType');
   if(!selector)return false;
-  if(selector.value!==documentType){selector.value=documentType;selector.dispatchEvent(new Event('change',{bubbles:true}));}
-  selector.disabled=true;
+  const hasExistingRecord=new URLSearchParams(location.search).has('quotation');
+  if(!hasExistingRecord&&selector.value!==documentType){selector.value=documentType;selector.dispatchEvent(new Event('change',{bubbles:true}));}
+  if(!hasExistingRecord)selector.disabled=true;
+  if(isConfirmation){
+   const template=doc?.querySelector<HTMLSelectElement>('#template');
+   if(template){const options=Array.from(template.options).filter(option=>!option.disabled&&option.value&&option.textContent?.trim());setConfirmationFormats(options.map(option=>({value:option.value,label:option.textContent!.trim()})));setSelectedFormat(template.value);template.addEventListener('change',()=>setSelectedFormat(template.value));if(!hasExistingRecord){const label=template.closest('label');if(label)label.hidden=true;}}
+  }
   setEditorModeReady(true);
   return true;
  }
+ function chooseConfirmationFormat(value:string){const template=frame.current?.contentDocument?.querySelector<HTMLSelectElement>('#template');if(!template)return;template.value=value;template.dispatchEvent(new Event('change',{bubbles:true}));setSelectedFormat(value);}
  useEffect(()=>{
   const initial=new URLSearchParams(location.search).get('quotation')||'';
   if(/^[a-f0-9-]{36}$/.test(initial))setQuotationId(initial);
@@ -56,6 +61,7 @@ export default function DigitalEditor({documentType='quotation'}:{documentType?:
  return <AdminShell title={isConfirmation?'Confirmation':'Quotation'}><main style={{padding:'18px',maxWidth:'none'}}>
   <h1 style={{fontSize:24,margin:'0 0 12px'}}>{isConfirmation?'Confirmation':'Quotation'}</h1>
   <nav aria-label="Dokumen digital" style={{display:'flex',gap:18,borderBottom:'1px solid #dce3ec',paddingBottom:10,marginBottom:12}}><Link aria-current={!isConfirmation?'page':undefined} href="/admin/quotation-digital">Quotation</Link><Link aria-current={isConfirmation?'page':undefined} href="/admin/confirmation-digital">Confirmation</Link><Link href="/admin/event-orders">Event Order / Internal</Link></nav>
+  {isConfirmation&&<section aria-label="Format Confirmation" style={{display:'grid',gridTemplateColumns:'minmax(220px,360px) 1fr',alignItems:'end',gap:'8px 16px',padding:'14px 16px',margin:'0 0 12px',border:'1px solid #cbd8d4',borderRadius:8,background:'#f7faf9'}}><label style={{display:'grid',gap:6,fontWeight:600}}>Pilih format Confirmation<select value={selectedFormat} onChange={e=>chooseConfirmationFormat(e.target.value)} disabled={!editorModeReady||!confirmationFormats.length} style={{padding:10,border:'1px solid #cbd8d4',borderRadius:6,background:'#fff'}}><option value="">Pilih jenis majlis…</option>{confirmationFormats.map(format=><option key={format.value} value={format.value}>{format.label}</option>)}</select></label><p style={{margin:0,color:'#51676a',fontSize:14}}>Butiran majlis, kadar, menu dan pakej boleh diedit. Menu boleh terus ditampal; billing tambahan boleh ditambah bila perlu.</p></section>}
   <p><Link href="/admin/dokumen-pelanggan">{tx('Dokumen pelanggan — Confirmation bertandatangan, e-Invois & bayaran','Customer documents — signed Confirmation, e-Invoice & payment')}</Link></p>
   {ready&&quotationId&&<SourceFile quotation={quotationId}/>}
   {ready&&quotationId&&<StaffSignatures/>}

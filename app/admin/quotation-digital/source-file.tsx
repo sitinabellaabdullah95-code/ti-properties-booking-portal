@@ -1,0 +1,14 @@
+'use client';
+import {useEffect,useState} from 'react';
+import {publicDb} from '../../../lib/supabase';
+
+type Attachment={applicable?:boolean;attached:boolean;name?:string;size?:number};
+export default function SourceFile({quotation}:{quotation:string}){
+ const [token,setToken]=useState(''),[info,setInfo]=useState<Attachment|null>(null),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
+ useEffect(()=>{let live=true;void publicDb().auth.getSession().then(({data:{session}})=>{if(live&&session){setToken(session.access_token);void load(session.access_token);}});return()=>{live=false;};},[quotation]);
+ async function load(access=token){if(!access)return;try{const r=await fetch('/api/admin/digital/source-file?quotation='+encodeURIComponent(quotation),{headers:{authorization:'Bearer '+access},cache:'no-store'}),d=await r.json();if(!r.ok)throw Error(d.error);setInfo(d);}catch(e){setMessage((e as Error).message);}}
+ async function upload(file:File){setBusy(true);setMessage('');try{const form=new FormData();form.append('quotation',quotation);form.append('file',file);const r=await fetch('/api/admin/digital/source-file',{method:'POST',headers:{authorization:'Bearer '+token},body:form}),d=await r.json();if(!r.ok)throw Error(d.error);setInfo(d);setMessage('Fail asal penuh telah dilampirkan tanpa pindaan.');}catch(e){setMessage((e as Error).message);}finally{setBusy(false);}}
+ async function download(){if(!token)return;setBusy(true);setMessage('');try{const r=await fetch('/api/admin/digital/source-file?quotation='+encodeURIComponent(quotation)+'&download=1',{headers:{authorization:'Bearer '+token},cache:'no-store'});if(!r.ok)throw Error((await r.json()).error);const b=await r.blob(),u=URL.createObjectURL(b),a=document.createElement('a');a.href=u;a.download=info?.name||'Confirmation.docx';a.click();setTimeout(()=>URL.revokeObjectURL(u),2000);}catch(e){setMessage((e as Error).message);}finally{setBusy(false);}}
+ if(info?.applicable===false)return null;
+ return <section aria-label="Fail Confirmation asal" style={{margin:'12px 0',padding:'12px 16px',border:'1px solid #cbd8d4',borderRadius:8,background:'#f7faf9',display:'flex',alignItems:'center',gap:12,flexWrap:'wrap'}}><strong>Fail Confirmation asal (DOCX)</strong>{info?.attached?<><span>{info.name} · {(Number(info.size||0)/1024).toFixed(0)} KB</span><button type="button" disabled={busy} onClick={()=>void download()}>Muat turun fail asal</button></>:<><label style={{display:'inline-flex',alignItems:'center',gap:8}}><span>Pilih fail asal untuk lampiran</span><input type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" disabled={!token||busy} onChange={e=>{const f=e.currentTarget.files?.[0];e.currentTarget.value='';if(f)void upload(f);}}/></label><small>DOCX maksimum 25 MB. Isi dokumen tidak diubah.</small></>}{busy&&<span role="status">Sedang diproses…</span>}{message&&<span role="status">{message}</span>}</section>;
+}

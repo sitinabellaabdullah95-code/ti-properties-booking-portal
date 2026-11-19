@@ -6,6 +6,7 @@ import AdminShell from '../../../components/AdminShell';
 import {publicDb} from '../../../lib/supabase';
 import {useLanguage} from '../../../components/Language';
 import SourceFile from './source-file';
+import StaffSignatures from './staff-signatures';
 
 export default function DigitalQuotation(){
  const {language}=useLanguage(),tx=(a:string,b:string)=>language==='en'?b:a;
@@ -45,6 +46,7 @@ export default function DigitalQuotation(){
   <h1 style={{fontSize:24,margin:'0 0 12px'}}>Quotation & Confirmation</h1>
   <p><Link href="/admin/dokumen-pelanggan">{tx('Dokumen pelanggan — Confirmation bertandatangan, e-Invois & bayaran','Customer documents — signed Confirmation, e-Invoice & payment')}</Link></p>
   {ready&&quotationId&&<SourceFile quotation={quotationId}/>}
+  {ready&&quotationId&&<StaffSignatures/>}
   {ready&&quotationId&&<button disabled={sending} onClick={resend}>Hantar semula e-mel kelulusan</button>}
   {notice&&<p role="status">{notice}</p>}{error&&<p role="alert" className="error">{error}</p>}
   {!ready&&!error&&<p role="status">{tx('Menyambungkan sesi admin…','Connecting admin session…')}</p>}

@@ -19,12 +19,13 @@ export default function DigitalEditor({documentType='quotation',embedded=false,i
   if(embedded&&isConfirmation)doc?.querySelectorAll('#homeTab,#editorTab,#confirmationTab,#folderTab').forEach(tab=>(tab as HTMLButtonElement).hidden=true);
   const selector=doc?.querySelector<HTMLSelectElement>('#documentType');
   if(!selector){
-   const tab=doc?.querySelector<HTMLButtonElement>(isConfirmation?'#confirmationTab':'#editorTab');
+   const hasExistingRecord=!!initialQuotationId||new URLSearchParams(location.search).has('quotation');
+   const tab=hasExistingRecord?null:doc?.querySelector<HTMLButtonElement>(isConfirmation?'#confirmationTab':'#editorTab');
    if(tab&&attempt===0){setEditorModeReady(true);tab.click();}
    if(attempt<40)window.setTimeout(()=>setEditorType(attempt+1),100);
    return false;
   }
-  const hasExistingRecord=new URLSearchParams(location.search).has('quotation');
+  const hasExistingRecord=!!initialQuotationId||new URLSearchParams(location.search).has('quotation');
   if(!hasExistingRecord&&selector.value!==documentType){selector.value=documentType;selector.dispatchEvent(new Event('change',{bubbles:true}));}
   if(!hasExistingRecord)selector.disabled=true;
   if(isConfirmation){

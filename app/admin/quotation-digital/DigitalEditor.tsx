@@ -14,10 +14,15 @@ export default function DigitalEditor({documentType='quotation'}:{documentType?:
  const frame=useRef<HTMLIFrameElement>(null);
  const [ready,setReady]=useState(false),[editorHtml,setEditorHtml]=useState(''),[error,setError]=useState(''),[notice,setNotice]=useState(''),[sending,setSending]=useState(false),[quotationId,setQuotationId]=useState(''),[editorModeReady,setEditorModeReady]=useState(false),[confirmationFormats,setConfirmationFormats]=useState<Array<{value:string;label:string}>>([]),[selectedFormat,setSelectedFormat]=useState('');
  async function resend(){if(sending)return;setSending(true);setNotice('Menghantar notifikasi…');try{const id=new URLSearchParams(location.search).get('quotation');const r=await fetch('/api/admin/digital/quotations/'+encodeURIComponent(id||'')+'/notify',{method:'POST'});const d=await r.json();setNotice(d.message||d.error||'Sila semak sejarah.');}catch{setNotice('Keputusan penghantaran belum diketahui. Semak sejarah sebelum cuba lagi.');}finally{setSending(false);}}
- function setEditorType(){
+ function setEditorType(attempt=0){
   const doc=frame.current?.contentDocument;
   const selector=doc?.querySelector<HTMLSelectElement>('#documentType');
-  if(!selector)return false;
+  if(!selector){
+   const tab=doc?.querySelector<HTMLButtonElement>(isConfirmation?'#confirmationTab':'#editorTab');
+   if(tab&&attempt===0)tab.click();
+   if(tab&&attempt<40)window.setTimeout(()=>setEditorType(attempt+1),100);
+   return false;
+  }
   const hasExistingRecord=new URLSearchParams(location.search).has('quotation');
   if(!hasExistingRecord&&selector.value!==documentType){selector.value=documentType;selector.dispatchEvent(new Event('change',{bubbles:true}));}
   if(!hasExistingRecord)selector.disabled=true;
@@ -68,6 +73,6 @@ export default function DigitalEditor({documentType='quotation'}:{documentType?:
   {ready&&quotationId&&<button disabled={sending} onClick={resend}>Hantar semula e-mel kelulusan</button>}
   {notice&&<p role="status">{notice}</p>}{error&&<p role="alert" className="error">{error}</p>}
   {!ready&&!error&&<p role="status">{tx('Menyambungkan sesi admin…','Connecting admin session…')}</p>}
-  {ready&&<iframe ref={frame} title={isConfirmation?'Confirmation Digital Drawbridge':'Quotation Digital Drawbridge'} srcDoc={editorHtml} onLoad={setEditorType} style={{width:'100%',height:'calc(100vh - 220px)',minHeight:650,border:'1px solid #dce3ec',borderRadius:8,background:'white',visibility:editorModeReady?'visible':'hidden'}}/>}
+  {ready&&<iframe ref={frame} title={isConfirmation?'Confirmation Digital Drawbridge':'Quotation Digital Drawbridge'} srcDoc={editorHtml} onLoad={()=>setEditorType()} style={{width:'100%',height:'calc(100vh - 220px)',minHeight:650,border:'1px solid #dce3ec',borderRadius:8,background:'white',visibility:editorModeReady?'visible':'hidden'}}/>}
  </main></AdminShell>;
 }

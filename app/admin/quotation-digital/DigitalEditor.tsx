@@ -19,8 +19,8 @@ export default function DigitalEditor({documentType='quotation'}:{documentType?:
   const selector=doc?.querySelector<HTMLSelectElement>('#documentType');
   if(!selector){
    const tab=doc?.querySelector<HTMLButtonElement>(isConfirmation?'#confirmationTab':'#editorTab');
-   if(tab&&attempt===0)tab.click();
-   if(tab&&attempt<40)window.setTimeout(()=>setEditorType(attempt+1),100);
+   if(tab&&attempt===0){setEditorModeReady(true);tab.click();}
+   if(attempt<40)window.setTimeout(()=>setEditorType(attempt+1),100);
    return false;
   }
   const hasExistingRecord=new URLSearchParams(location.search).has('quotation');

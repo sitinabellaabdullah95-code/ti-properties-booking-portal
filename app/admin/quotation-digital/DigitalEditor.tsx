@@ -13,19 +13,19 @@ export default function DigitalEditor({documentType='quotation',embedded=false,i
  const isConfirmation=documentType==='confirmation';
  const frame=useRef<HTMLIFrameElement>(null);
  const [ready,setReady]=useState(false),[editorHtml,setEditorHtml]=useState(''),[error,setError]=useState(''),[notice,setNotice]=useState(''),[sending,setSending]=useState(false),[quotationId,setQuotationId]=useState(''),[editorModeReady,setEditorModeReady]=useState(false),[confirmationFormats,setConfirmationFormats]=useState<Array<{value:string;label:string}>>([]),[selectedFormat,setSelectedFormat]=useState('');
- async function resend(){if(sending)return;setSending(true);setNotice('Menghantar notifikasi…');try{const id=initialQuotationId||new URLSearchParams(location.search).get('quotation');const r=await fetch('/api/admin/digital/quotations/'+encodeURIComponent(id||'')+'/notify',{method:'POST'});const d=await r.json();setNotice(d.message||d.error||'Sila semak sejarah.');}catch{setNotice('Keputusan penghantaran belum diketahui. Semak sejarah sebelum cuba lagi.');}finally{setSending(false);}}
+ async function resend(){if(sending)return;setSending(true);setNotice('Menghantar notifikasi…');try{const id=embedded?initialQuotationId:(initialQuotationId||new URLSearchParams(location.search).get('quotation'));const r=await fetch('/api/admin/digital/quotations/'+encodeURIComponent(id||'')+'/notify',{method:'POST'});const d=await r.json();setNotice(d.message||d.error||'Sila semak sejarah.');}catch{setNotice('Keputusan penghantaran belum diketahui. Semak sejarah sebelum cuba lagi.');}finally{setSending(false);}}
  function setEditorType(attempt=0){
   const doc=frame.current?.contentDocument;
   if(embedded&&isConfirmation)doc?.querySelectorAll('#homeTab,#editorTab,#confirmationTab,#folderTab').forEach(tab=>(tab as HTMLButtonElement).hidden=true);
   const selector=doc?.querySelector<HTMLSelectElement>('#documentType');
   if(!selector){
-   const hasExistingRecord=!!initialQuotationId||new URLSearchParams(location.search).has('quotation');
+   const hasExistingRecord=embedded?!!initialQuotationId:!!(initialQuotationId||new URLSearchParams(location.search).has('quotation'));
    const tab=hasExistingRecord?null:doc?.querySelector<HTMLButtonElement>(isConfirmation?'#confirmationTab':'#editorTab');
    if(tab&&attempt===0){setEditorModeReady(true);tab.click();}
    if(attempt<40)window.setTimeout(()=>setEditorType(attempt+1),100);
    return false;
   }
-  const hasExistingRecord=!!initialQuotationId||new URLSearchParams(location.search).has('quotation');
+  const hasExistingRecord=embedded?!!initialQuotationId:!!(initialQuotationId||new URLSearchParams(location.search).has('quotation'));
   if(!hasExistingRecord&&selector.value!==documentType){selector.value=documentType;selector.dispatchEvent(new Event('change',{bubbles:true}));}
   if(!hasExistingRecord)selector.disabled=true;
   if(isConfirmation){
@@ -37,7 +37,7 @@ export default function DigitalEditor({documentType='quotation',embedded=false,i
  }
  function chooseConfirmationFormat(value:string){const template=frame.current?.contentDocument?.querySelector<HTMLSelectElement>('#template');if(!template)return;template.value=value;template.dispatchEvent(new Event('change',{bubbles:true}));setSelectedFormat(value);}
  useEffect(()=>{
-  const initial=initialQuotationId||new URLSearchParams(location.search).get('quotation')||'';
+  const initial=embedded?initialQuotationId:(initialQuotationId||new URLSearchParams(location.search).get('quotation')||'');
   if(/^[a-f0-9-]{36}$/.test(initial))setQuotationId(initial);
   const onMessage=(e:MessageEvent)=>{
    if(e.origin===location.origin&&e.source===frame.current?.contentWindow&&e.data?.type==='tip-digital-navigation'){
@@ -58,7 +58,7 @@ export default function DigitalEditor({documentType='quotation',embedded=false,i
    const r=await fetch('/api/admin/digital/session',{method:'POST',headers:{authorization:'Bearer '+session.access_token},cache:'no-store'});
    if(!r.ok)throw Error((await r.json()).error||'Akses tidak tersedia.');
    if(!checkedEventReturn){checkedEventReturn=true;try{const raw=localStorage.getItem('tip-event-order-return');if(raw){const target=JSON.parse(raw);localStorage.removeItem('tip-event-order-return');if(target.email===session.user.email?.toLowerCase()&&Date.now()-target.at<3600000&&Date.now()>=target.at&&(!target.id||/^[a-f0-9-]{36}$/.test(target.id))){location.replace('/admin/event-orders'+(target.id?'?order='+encodeURIComponent(target.id):''));return;}}}catch{}}
-   if(!editorLoaded){const id=initialQuotationId||new URLSearchParams(location.search).get('quotation'),query=new URLSearchParams();if(id)query.set('quotation',id);query.set('type',documentType);const editor=await fetch('/api/admin/digital/editor?'+query.toString(),{headers:{authorization:'Bearer '+session.access_token},cache:'no-store'});if(!editor.ok)throw Error('Editor belum dapat dimuatkan.');const html=await editor.text();if(alive){setEditorHtml(html);editorLoaded=true;}}
+   if(!editorLoaded){const id=embedded?initialQuotationId:(initialQuotationId||new URLSearchParams(location.search).get('quotation')),query=new URLSearchParams();if(id)query.set('quotation',id);query.set('type',documentType);const editor=await fetch('/api/admin/digital/editor?'+query.toString(),{headers:{authorization:'Bearer '+session.access_token},cache:'no-store'});if(!editor.ok)throw Error('Editor belum dapat dimuatkan.');const html=await editor.text();if(alive){setEditorHtml(html);editorLoaded=true;}}
    if(alive){setReady(true);setError('');}
   }catch(e){if(alive)setError((e as Error).message);}}
   void connect();const timer=setInterval(connect,60000);

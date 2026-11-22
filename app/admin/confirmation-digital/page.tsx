@@ -1,3 +1,3 @@
-import DigitalEditor from '../quotation-digital/DigitalEditor';
+import ConfirmationPortal from './ConfirmationPortal';
 
-export default function ConfirmationDigital(){return <DigitalEditor documentType="confirmation"/>;}
+export default function ConfirmationDigital(){return <ConfirmationPortal/>;}

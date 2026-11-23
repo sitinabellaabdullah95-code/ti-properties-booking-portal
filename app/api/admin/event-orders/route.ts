@@ -18,11 +18,11 @@ export async function POST(req:Request){try{requireOrigin(req);const {db,me}=awa
   if(!canPrepareDigital(me.role)&&!canApproveDigital(me.role))return NextResponse.json({error:'Akses admin diperlukan.'},{status:403});
   if(current.reviewStatus!=='approved')return NextResponse.json({error:'E-mel kepada Operation hanya tersedia selepas kelulusan Farhana.'},{status:409});
   const auditPath='event-order-notices/'+current.id+'--operation.json';
-  const prior=await db.storage.from('digital-documents').download(auditPath);
-  if(prior.data){try{const state=JSON.parse(await prior.data.text());if(state.state==='accepted')return NextResponse.json({...current,notification:'already_sent'},{headers});}catch{}}
+  const prior=await db.storage.from('digital-documents').download(auditPath);let priorState:any=null;
+  if(prior.data){try{priorState=JSON.parse(await prior.data.text());if(priorState.state==='accepted'&&priorState.revision===current.revision)return NextResponse.json({...current,notification:'already_sent'},{headers});}catch{}}
   const approvedPdf=await eventOrderCombinedPdf(db,current);
   const notification=await notifyOperationEventOrder(current,approvedPdf);
-  const audit={id:current.id,revision:current.revision,state:notification,at:new Date().toISOString(),action,to:['fatin@tiproperties.my','farah@tiproperties.my'],pdfAttachmentIncluded:true,portalLinkIncluded:false};
+  const at=new Date().toISOString(),previousSends=Array.isArray(priorState?.sends)?priorState.sends:priorState?[{revision:priorState.revision,state:priorState.state,at:priorState.at}]:[],send={revision:current.revision,state:notification,at};const audit={id:current.id,revision:current.revision,state:notification,at,action,to:['fatin@tiproperties.my','farah@tiproperties.my'],pdfAttachmentIncluded:true,portalLinkIncluded:false,sends:[...previousSends,send]};
   await db.storage.from('digital-documents').upload(auditPath,Buffer.from(JSON.stringify(audit)),{contentType:'application/octet-stream',upsert:true});
   return NextResponse.json({...current,notification},{headers});
  }

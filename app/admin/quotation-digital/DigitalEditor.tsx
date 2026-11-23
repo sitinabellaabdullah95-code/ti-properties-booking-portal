@@ -20,7 +20,7 @@ export default function DigitalEditor({documentType='quotation',embedded=false,i
   const selector=doc?.querySelector<HTMLSelectElement>('#documentType');
   if(!selector){
    const hasExistingRecord=embedded?!!initialQuotationId:!!(initialQuotationId||new URLSearchParams(location.search).has('quotation'));
-   const tab=hasExistingRecord?null:doc?.querySelector<HTMLButtonElement>(isConfirmation?'#confirmationTab':'#editorTab');
+   const tab=hasExistingRecord?null:(doc?.querySelector<HTMLButtonElement>(isConfirmation?'#newConfirmationHome':'#newQuoteHome')||doc?.querySelector<HTMLButtonElement>(isConfirmation?'#confirmationTab':'#editorTab'));
    if(tab&&attempt===0){setEditorModeReady(true);tab.click();}
    if(attempt<40)window.setTimeout(()=>setEditorType(attempt+1),100);
    return false;

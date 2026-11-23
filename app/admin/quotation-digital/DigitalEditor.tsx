@@ -17,15 +17,18 @@ export default function DigitalEditor({documentType='quotation',embedded=false,i
  function setEditorType(attempt=0){
   const doc=frame.current?.contentDocument;
   if(embedded&&isConfirmation)doc?.querySelectorAll('#homeTab,#editorTab,#confirmationTab,#folderTab').forEach(tab=>(tab as HTMLButtonElement).hidden=true);
+  const hasExistingRecord=embedded?!!initialQuotationId:!!(initialQuotationId||new URLSearchParams(location.search).has('quotation'));
+  if(!hasExistingRecord){
+   const startButton=doc?.querySelector<HTMLButtonElement>(isConfirmation?'#newConfirmationHome':'#newQuoteHome');
+   if(attempt===0&&startButton&&!startButton.hidden&&startButton.getClientRects().length){setEditorModeReady(true);startButton.click();if(attempt<40)window.setTimeout(()=>setEditorType(attempt+1),100);return false;}
+  }
   const selector=doc?.querySelector<HTMLSelectElement>('#documentType');
   if(!selector){
-   const hasExistingRecord=embedded?!!initialQuotationId:!!(initialQuotationId||new URLSearchParams(location.search).has('quotation'));
    const tab=hasExistingRecord?null:(doc?.querySelector<HTMLButtonElement>(isConfirmation?'#newConfirmationHome':'#newQuoteHome')||doc?.querySelector<HTMLButtonElement>(isConfirmation?'#confirmationTab':'#editorTab'));
    if(tab&&attempt===0){setEditorModeReady(true);tab.click();}
    if(attempt<40)window.setTimeout(()=>setEditorType(attempt+1),100);
    return false;
   }
-  const hasExistingRecord=embedded?!!initialQuotationId:!!(initialQuotationId||new URLSearchParams(location.search).has('quotation'));
   if(!hasExistingRecord&&selector.value!==documentType){selector.value=documentType;selector.dispatchEvent(new Event('change',{bubbles:true}));}
   if(!hasExistingRecord)selector.disabled=true;
   if(isConfirmation){

@@ -12,6 +12,7 @@ export default function DigitalEditor({documentType='quotation',embedded=false,i
  const {language}=useLanguage(),tx=(a:string,b:string)=>language==='en'?b:a;
  const isConfirmation=documentType==='confirmation';
  const frame=useRef<HTMLIFrameElement>(null);
+ const confirmationPackageDefaultsApplied=useRef(false);
  const [ready,setReady]=useState(false),[editorHtml,setEditorHtml]=useState(''),[error,setError]=useState(''),[notice,setNotice]=useState(''),[sending,setSending]=useState(false),[quotationId,setQuotationId]=useState(''),[editorModeReady,setEditorModeReady]=useState(false),[confirmationFormats,setConfirmationFormats]=useState<Array<{value:string;label:string}>>([]),[selectedFormat,setSelectedFormat]=useState('');
  async function resend(){if(sending)return;setSending(true);setNotice('Menghantar notifikasi…');try{const id=embedded?initialQuotationId:(initialQuotationId||new URLSearchParams(location.search).get('quotation'));const r=await fetch('/api/admin/digital/quotations/'+encodeURIComponent(id||'')+'/notify',{method:'POST'});const d=await r.json();setNotice(d.message||d.error||'Sila semak sejarah.');}catch{setNotice('Keputusan penghantaran belum diketahui. Semak sejarah sebelum cuba lagi.');}finally{setSending(false);}}
  function setEditorType(attempt=0){
@@ -34,6 +35,7 @@ export default function DigitalEditor({documentType='quotation',embedded=false,i
   if(!hasExistingRecord&&selector.value!==documentType){selector.value=documentType;selector.dispatchEvent(new Event('change',{bubbles:true}));}
   if(!hasExistingRecord)selector.disabled=true;
   if(isConfirmation){
+   const packageChecks=doc?.querySelectorAll<HTMLInputElement>('#packageOptions [data-package-group]');if(!hasExistingRecord&&!confirmationPackageDefaultsApplied.current&&packageChecks?.length){packageChecks.forEach(input=>{if(input.checked){input.checked=false;input.dispatchEvent(new Event('change',{bubbles:true}));}});confirmationPackageDefaultsApplied.current=true;}
    const template=doc?.querySelector<HTMLSelectElement>('#template');
    if(template){const options=Array.from(template.options).filter(option=>!option.disabled&&option.value&&option.textContent?.trim());setConfirmationFormats(options.map(option=>({value:option.value,label:option.textContent!.trim()})));setSelectedFormat(template.value);template.addEventListener('change',()=>setSelectedFormat(template.value));if(!hasExistingRecord){const label=template.closest('label');if(label)label.hidden=true;}}
   }

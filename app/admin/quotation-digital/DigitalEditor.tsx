@@ -16,6 +16,7 @@ export default function DigitalEditor({documentType='quotation',embedded=false,i
  async function resend(){if(sending)return;setSending(true);setNotice('Menghantar notifikasi…');try{const id=embedded?initialQuotationId:(initialQuotationId||new URLSearchParams(location.search).get('quotation'));const r=await fetch('/api/admin/digital/quotations/'+encodeURIComponent(id||'')+'/notify',{method:'POST'});const d=await r.json();setNotice(d.message||d.error||'Sila semak sejarah.');}catch{setNotice('Keputusan penghantaran belum diketahui. Semak sejarah sebelum cuba lagi.');}finally{setSending(false);}}
  function setEditorType(attempt=0){
   const doc=frame.current?.contentDocument;
+  if(isConfirmation&&doc?.body){const walker=doc.createTreeWalker(doc.body,4);while(walker.nextNode()){const node=walker.currentNode;if(node.nodeValue?.includes('QUOTATION DIGITAL'))node.nodeValue=node.nodeValue.replace('QUOTATION DIGITAL','CONFIRMATION');}}
   if(embedded&&isConfirmation)doc?.querySelectorAll('#homeTab,#editorTab,#confirmationTab,#folderTab').forEach(tab=>(tab as HTMLButtonElement).hidden=true);
   const hasExistingRecord=embedded?!!initialQuotationId:!!(initialQuotationId||new URLSearchParams(location.search).has('quotation'));
   if(!hasExistingRecord){

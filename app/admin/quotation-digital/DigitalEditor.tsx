@@ -28,7 +28,10 @@ export default function DigitalEditor({documentType='quotation',embedded=false,i
    if(attempt<40)window.setTimeout(()=>setEditorType(attempt+1),100);
    return false;
   }
-  if(!hasExistingRecord&&attempt<5){if(selector.value!==documentType){selector.value=documentType;selector.dispatchEvent(new Event('change',{bubbles:true}));}window.setTimeout(()=>setEditorType(attempt+1),200);return false;}
+  // Switching the initial document type can raise a confirmation prompt when
+  // the embedded editor still has a local draft. Retrying the change every
+  // 200ms caused the same prompt to reopen repeatedly. Request the switch once
+  // and let the editor's change handler finish it.
   if(!hasExistingRecord&&selector.value!==documentType){selector.value=documentType;selector.dispatchEvent(new Event('change',{bubbles:true}));}
   if(!hasExistingRecord)selector.disabled=true;
   if(isConfirmation){

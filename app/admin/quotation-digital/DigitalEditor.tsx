@@ -79,7 +79,7 @@ export default function DigitalEditor({documentType='quotation',embedded=false,i
   {ready&&quotationId&&<button disabled={sending} onClick={resend}>Hantar semula e-mel kelulusan</button>}
   {notice&&<p role="status">{notice}</p>}{error&&<p role="alert" className="error">{error}</p>}
   {!ready&&!error&&<p role="status">{tx('Menyambungkan sesi admin…','Connecting admin session…')}</p>}
-  {ready&&<iframe ref={frame} title={isConfirmation?'Confirmation Digital Drawbridge':'Quotation Digital Drawbridge'} srcDoc={editorHtml} onLoad={()=>setEditorType()} style={{width:'100%',height:'calc(100vh - 220px)',minHeight:650,border:'1px solid #dce3ec',borderRadius:8,background:'white',visibility:isConfirmation||editorModeReady?'visible':'hidden'}}/>}
+  {ready&&<iframe ref={frame} title={isConfirmation?'Confirmation Digital Drawbridge':'Quotation Digital Drawbridge'} srcDoc={editorHtml} onLoad={()=>setEditorType()} style={{width:'100%',height:'calc(100vh - 220px)',minHeight:650,border:'1px solid #dce3ec',borderRadius:8,background:'white',visibility:'visible'}}/>}
  </main>;
  return embedded?page:<AdminShell title={isConfirmation?'Confirmation':'Quotation'}>{page}</AdminShell>;
 }

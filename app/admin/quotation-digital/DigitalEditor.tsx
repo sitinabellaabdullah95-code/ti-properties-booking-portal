@@ -20,14 +20,11 @@ export default function DigitalEditor({documentType='quotation',embedded=false,i
   if(isConfirmation&&doc?.body){const walker=doc.createTreeWalker(doc.body,4);while(walker.nextNode()){const node=walker.currentNode;if(node.nodeValue?.includes('QUOTATION DIGITAL'))node.nodeValue=node.nodeValue.replace('QUOTATION DIGITAL','CONFIRMATION');}}
   if(embedded&&isConfirmation)doc?.querySelectorAll('#homeTab,#editorTab,#confirmationTab,#folderTab').forEach(tab=>(tab as HTMLButtonElement).hidden=true);
   const hasExistingRecord=embedded?!!initialQuotationId:!!(initialQuotationId||new URLSearchParams(location.search).has('quotation'));
-  if(!hasExistingRecord){
-   const editorTab=doc?.querySelector<HTMLButtonElement>(isConfirmation?'#confirmationTab':'#editorTab');
-   if(attempt===0&&editorTab&&!editorTab.hidden&&editorTab.getClientRects().length){setEditorModeReady(true);editorTab.click();if(attempt<40)window.setTimeout(()=>setEditorType(attempt+1),100);return false;}
-  }
   const selector=doc?.querySelector<HTMLSelectElement>('#documentType');
   if(!selector){
    const tab=hasExistingRecord?null:doc?.querySelector<HTMLButtonElement>(isConfirmation?'#confirmationTab':'#editorTab');
-   if(tab&&attempt===0){setEditorModeReady(true);tab.click();}
+   if(tab&&!tab.dataset.parentEditorReady){tab.dataset.parentEditorReady='true';tab.addEventListener('click',()=>window.setTimeout(()=>setEditorType(0),0),{once:true});}
+   if(!hasExistingRecord)setEditorModeReady(true);
    if(attempt<40)window.setTimeout(()=>setEditorType(attempt+1),100);
    return false;
   }
